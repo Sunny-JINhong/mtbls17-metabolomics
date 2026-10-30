@@ -1,0 +1,76 @@
+R version 4.4.2 (2024-10-31 ucrt)
+Platform: x86_64-w64-mingw32/x64
+Running under: Windows 11 x64 (build 22000)
+
+Matrix products: default
+
+
+locale:
+[1] LC_COLLATE=Chinese (Simplified)_China.utf8 
+[2] LC_CTYPE=Chinese (Simplified)_China.utf8   
+[3] LC_MONETARY=Chinese (Simplified)_China.utf8
+[4] LC_NUMERIC=C                               
+[5] LC_TIME=Chinese (Simplified)_China.utf8    
+
+time zone: Asia/Shanghai
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods  
+[7] base     
+
+other attached packages:
+ [1] MsExperiment_1.8.0  ProtGenerics_1.38.0 lubridate_1.9.5    
+ [4] forcats_1.0.1       stringr_1.6.0       dplyr_1.2.1        
+ [7] purrr_1.2.2         readr_2.2.0         tidyr_1.3.2        
+[10] tibble_3.3.1        ggplot2_4.0.3       tidyverse_2.0.0    
+[13] xcms_4.4.0          BiocParallel_1.40.2
+
+loaded via a namespace (and not attached):
+ [1] DBI_1.3.0                   rlang_1.3.0                
+ [3] magrittr_2.0.5              clue_0.3-68                
+ [5] MassSpecWavelet_1.72.1      otel_0.2.0                 
+ [7] matrixStats_1.5.0           compiler_4.4.2             
+ [9] vctrs_0.7.3                 reshape2_1.4.5             
+[11] pkgconfig_2.0.3             MetaboCoreUtils_1.14.0     
+[13] crayon_1.5.3                XVector_0.46.0             
+[15] tzdb_0.5.0                  UCSC.utils_1.2.0           
+[17] preprocessCore_1.68.0       MultiAssayExperiment_1.32.0
+[19] zlibbioc_1.52.0             GenomeInfoDb_1.42.3        
+[21] jsonlite_2.0.0              progress_1.2.3             
+[23] DelayedArray_0.32.0         parallel_4.4.2             
+[25] prettyunits_1.2.0           cluster_2.1.8.3            
+[27] R6_2.6.1                    stringi_1.8.9              
+[29] RColorBrewer_1.1-3          limma_3.62.2               
+[31] GenomicRanges_1.58.0        Rcpp_1.1.2                 
+[33] SummarizedExperiment_1.36.0 iterators_1.0.14           
+[35] snow_0.4-4                  IRanges_2.40.1             
+[37] timechange_0.4.0            Matrix_1.7-6               
+[39] igraph_2.3.4                tidyselect_1.2.1           
+[41] rstudioapi_0.19.0           abind_1.4-8                
+[43] doParallel_1.0.17           codetools_0.2-20           
+[45] affy_1.84.0                 lattice_0.23-1             
+[47] plyr_1.8.9                  withr_3.0.3                
+[49] Biobase_2.66.0              S7_0.2.2                   
+[51] Spectra_1.16.1              pillar_1.11.1              
+[53] affyio_1.76.0               BiocManager_1.30.27        
+[55] MatrixGenerics_1.18.1       foreach_1.5.2              
+[57] stats4_4.4.2                MSnbase_2.32.0             
+[59] MALDIquant_1.22.3           ncdf4_1.24                 
+[61] generics_0.1.4              S4Vectors_0.44.0           
+[63] hms_1.1.4                   scales_1.4.0               
+[65] glue_1.8.1                  MsFeatures_1.14.0          
+[67] lazyeval_0.2.3              tools_4.4.2                
+[69] mzID_1.44.0                 QFeatures_1.16.0           
+[71] vsn_3.74.0                  mzR_2.40.0                 
+[73] fs_2.1.0                    XML_3.99-0.25              
+[75] grid_4.4.2                  impute_1.80.0              
+[77] MsCoreUtils_1.18.0          colorspace_2.1-4           
+[79] GenomeInfoDbData_1.2.13     PSMatch_1.10.0             
+[81] cli_3.6.6                   S4Arrays_1.6.0             
+[83] AnnotationFilter_1.30.0     pcaMethods_1.98.0          
+[85] gtable_0.3.6                digest_0.6.39              
+[87] BiocGenerics_0.52.0         SparseArray_1.6.2          
+[89] farver_2.1.2                lifecycle_1.0.5            
+[91] httr_1.4.9                  statmod_1.5.2              
+[93] MASS_7.3-66                
