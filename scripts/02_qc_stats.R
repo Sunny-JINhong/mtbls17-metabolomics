@@ -8,8 +8,8 @@ library(ropls)
 library(tidyverse)
 library(ggrepel)
 
-out_dir <- "F:/study/meta"
-fig_dir <- "F:/study/meta/figures"
+out_dir  <- "C:/mtbls17"
+fig_dir <- "C:/mtbls17/figures"
 dir.create(fig_dir, showWarnings = TRUE, recursive = TRUE)
 
 # == 读入数据 ==
