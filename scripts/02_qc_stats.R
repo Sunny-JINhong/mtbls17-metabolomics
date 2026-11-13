@@ -132,7 +132,7 @@ p_opls <- ggplot(scores_opls, aes(t1, to1, color = group)) +
        color = "Group") +
   theme_bw(base_size = 13)
 
-ggsave(file.path(fig_dir, "fig_oplsda_scores_ggplot.pdf"), p_opls,
+ggsave(file.path(fig_dir, "fig_oplsda_scores.pdf"), p_opls,
        width = 10, height = 10, dpi = 300)
        
 
