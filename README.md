@@ -43,7 +43,13 @@ mtbls17-metabolomics/
 │       ├── sample_Spearman_heatmap.pdf
 │       ├── fig_PCA.pdf
 │       ├── fig_oplsda_scores.pdf
-│       └── fig_volcano.pdf
+│       ├── fig_volcano.pdf
+│       ├── fig_diff_metabolites_barplot.pdf
+│       ├── fig_diff_metabolites_Spearman_heatmap.pdf
+│       ├── fig_deg_network.pdf
+│       ├── fig_diff_heatmap.pdf
+│       ├── fig_pathway_enrichment.pdf
+│       └── fig_pathway_enrichment_bar.pdf
 └── .gitignore
 ```
 
