@@ -12,9 +12,10 @@ flowchart TD
     A[MTBLS17 原始数据<br/>Exp1 POS · 189样本×2技术重复] --> B[01 预处理<br/>XCMS4: 峰检测→RT校正→对齐→填补]
     B --> C[特征矩阵 898 × 189]
     C --> D[技术重复合并<br/>a/b 中位数]
-    D --> E[02 QC + 统计<br/>QC剔除 → 相关性热图/PCA/OPLS-DA]
+    D --> E[02 QC + 统计<br/>QC剔除 → 相关性热图/PCA/OPLS-DA ]
     E --> F[mummichog 注释<br/>MetaboAnalyst]
     F --> G[差异代谢物表<br/>+ 带注释火山图]
+    F --> H[通路富集分析<br/>+ 气泡图/条形图]
 ```
 
 ## 结果一览
@@ -22,10 +23,14 @@ flowchart TD
 | 分析 | 关键数字 | 图表 |
 | --- | --- | --- |
 | 技术重复性 QC | a/b 中位数 r = 0.96；剔除 2 个 r<0.8 样本 | 分布图 |
-| 样本间相关 | 未见分组聚类，个体差异为主 | 热图 |
+| 样本间相关 | 未见分组聚类，个体差异为主 | 样本相关热图 |
 | PCA | PC1 30.6% + PC2 16.2%，两组重叠 | 得分图 |
 | OPLS-DA | R2Y = 0.187，Q2 ≈ 0.04，p1 不显著 | 得分图 |
-| 注释 | 12 编号获得名称（KEGG API） | 标注火山图 |
+| 差异特征筛选 | p < 0.05 & FC > 1.5 | 火山图（带注释） |
+| 差异特征概览 | Top 20 | 条形图 |
+| 特征间共变化 | \|r\|>0.6，共80条边 | 特征相关性热图 / 网络图 |
+| 表达模式 | 38 特征 × 187 样本 | 聚类热图 |
+| 通路富集 | Top 15 通路 | 气泡图 / 条形图 |
 
 ## 目录结构
 
@@ -34,7 +39,7 @@ mtbls17-metabolomics/
 ├── README.md                       ← 本文件
 ├── scripts/
 │   ├── 01_preprocess.R               ← 上游预处理
-│   └── 02_qc_stats.R                 ← QC、统计、可视化、注释合并
+│   └── 02_qc_stats.R                 ← QC、统计、可视化、注释与通路分析
 ├── report/
 │   └── metabolomics_report.qmd       ← 分析报告 [待完成]
 ├── results/
@@ -83,13 +88,13 @@ Obiwarp 保留时间校正；PeakDensity 跨样本对齐；ChromPeakArea 缺失�
 
 ### 环境
 
-- R ≥ 4.3，Bioconductor，核心包：`xcms` 4.4、`MsExperiment`、`ropls`、`pheatmap`、`tidyverse`、`ggrepel`
+- R ≥ 4.3，Bioconductor，核心包：`xcms` 4.4、`MsExperiment`、`ropls`、`pheatmap`、`igraph`、`ggraph`、`tidyverse`、`ggrepel`
 - 完整环境见 `docs/sessionInfo_01.txt` / `docs/sessionInfo_02.txt`
 
 ```r
 if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager")
 BiocManager::install(c("xcms", "MsExperiment"))
-install.packages(c("tidyverse", "ropls", "pheatmap", "ggrepel"))
+install.packages(c("tidyverse", "ropls", "pheatmap", "ggrepel", "igraph", "ggraph"))
 ```
 
 ### 数据下载
@@ -106,7 +111,7 @@ source("scripts/01_preprocess.R")   # 上游预处理
 source("scripts/02_qc_stats.R")     # 统计与出图
 
 # 3. 02 脚本运行至导出 mummichog_input_full.txt 后：
-#    上传 MetaboAnalyst → Functional Analysis [LC-MS1] → 下载匹配表 → 继续运行
+#    上传 MetaboAnalyst → Functional Analysis [LC-MS1] → 下载化合物匹配表和通路富集表 → 继续运行
 ```
 
 ## 分析报告
