@@ -1,15 +1,17 @@
 ## =============================================================================
-## 质量控制与统计分析
+## 质量控制、统计分析、可视化与注释
 ## 输入：feature_table_per_sample.rds / cor_ab_technical_replicates.rds
 ## =============================================================================
 
 library(pheatmap)
 library(ropls)
+library(igraph)
+library(ggraph)
 library(tidyverse)
 library(ggrepel)
 
-out_dir  <- "C:/mtbls17"
-fig_dir <- "C:/mtbls17/figures"
+out_dir <- "F:/study/meta"
+fig_dir <- "F:/study/meta/figures"
 dir.create(fig_dir, showWarnings = TRUE, recursive = TRUE)
 
 # == 读入数据 ==
@@ -257,6 +259,143 @@ p_vol <- ggplot(res, aes(log2FC, -log10(pval), color = regulation)) +
 ggsave(file.path(fig_dir, "fig_volcano.pdf"), p_vol,
        width = 7, height = 6, dpi = 300)
   
+## ===== 图 6：差异代谢特征条形图 =====
+plot_df <- deg_annot %>%
+  mutate(label = ifelse(is.na(compound_name),
+                        paste0("m/z ", round(mz.x, 3), "(", feature, ")"), 
+                        paste0(gsub(";", "", compound_name), "(", feature, ")"))) %>%
+  mutate(direction = factor(ifelse(log2FC > 0, "上调", "下调"),
+                            levels = c("上调", "下调"))) %>%
+  arrange(desc(abs(log2FC))) %>%
+  slice_head(n = 20) %>%
+  arrange(direction, desc(abs(log2FC))) %>%
+  mutate(label = factor(label, levels = rev(label)))
+
+p_bar <- ggplot(plot_df, aes(label, log2FC, fill = direction)) +
+  geom_col(width = 0.7) +
+  coord_flip() +  
+  scale_fill_manual(values = c("上调" = "#E64B35", "下调" = "#4DBBD5")) +
+  geom_hline(yintercept = 0, color = "grey40", linewidth = 0.5) +
+  labs(x = NULL,
+       y = "log2 Fold Change (HCC/CRR)",
+       fill = NULL) +
+  theme_bw(base_size = 13) +
+  theme(legend.position = "top")
+
+ggsave(file.path(fig_dir, "fig_diff_metabolites_barplot.pdf"),
+       p_bar, width = 8, height = 7, dpi = 300)
+
+## ===== 图 7：差异代谢特征相关性热图 =====
+deg_mat <- ft_sample[deg$feature, ] 
+cor_deg <- cor(t(deg_mat), method = "spearman")
+
+p_diff_cor <- pheatmap(cor_deg,
+                       show_rownames  = TRUE, show_colnames = TRUE,
+                       fontsize_row = 8,
+                       color = colorRampPalette(c("#3B4CC0", "#F7F7F7", "#B40426"))(100),
+                       breaks = seq(-1, 1, length.out = 101),
+                       clustering_method = "complete")
+
+ggsave(file.path(fig_dir, "fig_diff_metabolites_Spearman_heatmap.pdf"),
+       p_diff_cor, width = 8, height = 7, dpi = 300)
+
+## ===== 图 8：差异代谢特征相关性网络图 =====
+thr <- 0.6
+edge_df <- cor_deg %>%
+  as.data.frame() %>%
+  rownames_to_column("from") %>%
+  pivot_longer(-from, names_to = "to", values_to = "r") %>%
+  filter(from < to,
+         abs(r) > thr)
+
+node_df <- deg_annot %>%
+  mutate(direction = ifelse(log2FC > 0, "上调", "下调"),
+         label = ifelse(is.na(compound_name),
+                        feature,
+                        paste0(feature, "(", gsub(";", "", compound_name), ")"))) %>%
+  select(feature, log2FC, pval, direction, label)
+
+set.seed(123) 
+
+g <- graph_from_data_frame(
+  edge_df %>% select(from, to, r),
+  directed = FALSE,
+  vertices  = node_df %>% select(feature, label, direction, pval, log2FC)
+)
+
+p_net <- ggraph(g, layout = "fr") +
+  geom_edge_link(aes(color = r, linewidth = abs(r)), alpha = 0.6) +
+  geom_node_point(aes(color = direction, size = -log10(pval)), alpha = 0.9) +
+  geom_node_text(aes(label = label), repel = TRUE, size = 3,
+                 max.overlaps = 50) +
+  scale_edge_color_gradient2(low = "#4DBBD5", mid = "grey85",
+                             high = "#E64B35", name = "相关 r") +
+  scale_edge_width(range = c(0.3, 1.5), guide = "none") +
+  scale_color_manual(values = c("上调" = "#E64B35", "下调" = "#4DBBD5"),
+                     name = "调控方向") +
+  scale_size_continuous(name = "-log10 p") +
+  theme_void(base_size = 13)
+
+ggsave(file.path(fig_dir, "fig_deg_network.pdf"),
+       p_net, width = 9, height = 7.5, dpi = 300)
+  
+## ===== 图 9：差异代谢特征聚类热图 =====
+mat_hm  <- log10(deg_mat)
+rownames(mat_hm) <- deg$feature
+
+anno_col <- data.frame(group = ifelse(grepl("_HCC_", colnames(mat_hm)), "HCC", "CRR"))
+rownames(anno_col) <- colnames(mat_hm)
+
+p_diff_heatmap <- pheatmap(mat_hm,
+                           annotation_col  = anno_col,
+                           annotation_colors = list(group = c(HCC = "#E64B35", CRR = "#4DBBD5")),
+                           scale           = "row",
+                           clustering_method = "complete",
+                           show_colnames   = TRUE,
+                           show_rownames   = TRUE,
+                           fontsize_row    = 8,
+                           fontsize_col    = 8,
+                           color           = colorRampPalette(c("#3B4CC0", "#F7F7F7", "#B40426"))(100),
+                           )
+
+ggsave(file.path(fig_dir, "fig_diff_heatmap.pdf"),
+       p_diff_heatmap, width = 27, height = 7.5, dpi = 300)
+
+## ===== 图 10：差异代谢特征通路富集图 =====
+pw <- read.csv("F:/study/meta/Functional_Analysis_[LC-MS1]/mummichog_pathway_enrichment_mummichog.csv", check.names = FALSE)
+pw_top <- pw %>%
+  mutate(EF = `Hits.sig` / Expected, neglog10p = -log10(`P(Fisher)`)) %>%
+  arrange(`P(Fisher)`) %>%
+  slice_head(n = 15) %>%
+  mutate(pathway = factor(`Pathway name`,
+                          levels = rev(`Pathway name`)))
+
+p_pathway_enrichment <- ggplot(pw_top, aes(EF, pathway)) +
+  geom_point(aes(size = Hits.sig, color = neglog10p), alpha = 0.85) +
+  scale_color_gradient(low = "#E8B93B", high = "#E64B35",
+                       name = expression(-log[10] ~ italic(p) ~ "(Fisher)")) +
+  scale_size_continuous(name = "Significant Hits", range = c(3, 8)) +
+  geom_vline(xintercept = 1, linetype = 3, color = "grey50") +
+  scale_x_continuous(expand = expansion(mult = c(0.05, 0.15))) +
+  labs(x = "Enrichment Factor (Hits.sig / Expected)",
+       y = NULL ) +
+  theme_bw(base_size = 13)
+
+ggsave(file.path(fig_dir, "fig_pathway_enrichment.pdf"),
+       p_pw_2, width = 9, height = 7.5, dpi = 300)
+
+p_pw_bar <- ggplot(pw_top, aes(Hits.sig, pathway)) +
+  geom_col(aes(fill = neglog10p), width = 0.7) +
+  scale_fill_gradient(low = "#E8B93B", high = "#E64B35",
+                      name = expression(-log[10] ~ italic(p) ~ "(Fisher)")) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.12))) +
+  labs(x = "Significant Hits",
+       y = NULL) +
+  theme_bw(base_size = 13)
+
+ggsave(file.path(fig_dir, "fig_pathway_enrichment_bar.pdf"),
+       p_pw_bar, width = 8, height = 6.5, dpi = 300)
 ## ===== 记录环境 =====
 writeLines(capture.output(sessionInfo()),
            file.path(out_dir, "sessionInfo_02.txt"))
+
